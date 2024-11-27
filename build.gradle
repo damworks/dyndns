@@ -1,0 +1,41 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'com.damworks.dyndns'
+version = '1.0.0'
+
+application {
+    mainClass = 'com.example.dyndns.DynDnsUpdater'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.2'
+    //implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+    implementation 'org.slf4j:slf4j-simple:2.0.9'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.0'
+}
+
+tasks.test {
+    useJUnitPlatform()
+}
+
+jar {
+    manifest {
+        attributes(
+                'Main-Class': application.mainClass.get()
+        )
+    }
+}
