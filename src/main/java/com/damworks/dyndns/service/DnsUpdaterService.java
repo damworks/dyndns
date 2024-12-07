@@ -1,6 +1,9 @@
 package com.damworks.dyndns.service;
 
+import com.damworks.dyndns.DynDnsUpdater;
 import com.damworks.dyndns.config.CloudflareDnsConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -9,6 +12,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class DnsUpdaterService {
+    private static final Logger logger = LoggerFactory.getLogger(DnsUpdaterService.class);
+
     private final String domain;
     private final String token;
     private final boolean ipDetectionEnabled;
@@ -35,7 +40,6 @@ public class DnsUpdaterService {
             apiUrl.append("&clear=true");
         } else {
             if (ipDetectionEnabled && ipv4 == null) {
-                // Rilevamento automatico dell'IP IPv4
             } else if (ipv4 != null) {
                 apiUrl.append("&ip=").append(ipv4);
             }
@@ -54,7 +58,7 @@ public class DnsUpdaterService {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
             String response = reader.readLine();
             if (response != null && response.startsWith("OK")) {
-                System.out.println("DuckDNS update successful. Response: " + response);
+                logger.info("DuckDNS update successful. Response: {}", response);
             } else {
                 throw new Exception("DuckDNS update failed. Response: " + response);
             }
@@ -77,9 +81,9 @@ public class DnsUpdaterService {
 
         int responseCode = connection.getResponseCode();
         if (responseCode == 200) {
-            System.out.println("DNS Record updated: " + record.getName() + " -> " + newIP);
+            logger.info("DNS Record updated: {} -> {}", record.getName(), newIP);
         } else {
-            System.err.println("Error updating DNS record. Response code: " + responseCode);
+            logger.error("Error updating DNS record. Response code: {}", responseCode);
         }
     }
 }

@@ -1,5 +1,8 @@
 package com.damworks.dyndns.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -9,7 +12,7 @@ import java.nio.file.Paths;
 import java.util.List;
 
 public class IpFileService {
-
+    private static final Logger logger = LoggerFactory.getLogger(DnsUpdaterService.class);
     private static final String DATA_DIR = "data";
     private static final String IP_FILE = DATA_DIR + "/ip.txt";
 
@@ -22,7 +25,6 @@ public class IpFileService {
         if (!Files.exists(dataPath)) {
             try {
                 Files.createDirectories(dataPath);
-                System.out.println("Directory 'data' successfully created.");
             } catch (IOException e) {
                 throw new RuntimeException("Error creating the 'data' directory: " + e.getMessage(), e);
             }
@@ -38,7 +40,7 @@ public class IpFileService {
                 }
             }
         } catch (IOException e) {
-            System.err.println("Error reading the IP file: " + e.getMessage());
+            logger.error("Error reading the IP file: {}", e.getMessage());
         }
         return null; // No saved IP
     }
@@ -47,9 +49,8 @@ public class IpFileService {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(IP_FILE, true))) {
             writer.write(ip);
             writer.newLine();
-            System.out.println("New IP saved: " + ip);
         } catch (IOException e) {
-            System.err.println("Error saving the IP: " + e.getMessage());
+            logger.error("Error saving the IP: {}", e.getMessage());
         }
     }
 }
