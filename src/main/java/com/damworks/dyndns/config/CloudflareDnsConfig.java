@@ -2,7 +2,7 @@ package com.damworks.dyndns.config;
 
 import java.util.List;
 
-public class DynDnsConfig {
+public class CloudflareDnsConfig {
     private Dyndns dyndns;
 
     public Dyndns getDyndns() {
