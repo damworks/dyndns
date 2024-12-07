@@ -6,12 +6,22 @@ import com.damworks.dyndns.service.IpFetcherService;
 import com.damworks.dyndns.service.IpFileService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class DynDnsUpdater {
+    private static final Logger logger = LoggerFactory.getLogger(DynDnsUpdater.class);
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
     public static void main(String[] args) {
         try {
+            String timestamp = LocalDateTime.now().format(formatter);
+            logger.info("{} Starting DynDNS update...", timestamp);
+
             ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
             DuckDnsConfig config = mapper.readValue(new File("config/duckdns.yaml"), DuckDnsConfig.class);
 
@@ -21,16 +31,19 @@ public class DynDnsUpdater {
 
             // Get the current public IP
             String currentIP = ipFetcherService.getCurrentPublicIP();
-            System.out.println("Current public IP: " + currentIP);
 
             // Read the last saved IP
             String lastIP = ipFileService.getLastSavedIP();
-            System.out.println("Last saved IP: " + (lastIP != null ? lastIP : "None"));
+
+            if (currentIP == null || currentIP.isEmpty()) {
+                logger.error("Error: Unable to fetch current IP.");
+                return;
+            }
 
             // Compare IPs
-            if (!currentIP.equals(lastIP)) {
-                System.out.println("The IP address has changed, update required.");
-
+            if (currentIP.equals(lastIP)) {
+                logger.info("No changes -> IP {}", currentIP);
+            } else {
                 try {
                     // Update the DNS records using DuckDNS API
                     DnsUpdaterService dnsUpdaterService = new DnsUpdaterService(
@@ -44,20 +57,17 @@ public class DynDnsUpdater {
 
                     // Pass the current IP to the updater service
                     dnsUpdaterService.updateDuckDns(currentIP, null); // Set IPv6 if needed
-                    System.out.println("DNS records updated successfully.");
+                    logger.info("New IP -> {} UPDATED", currentIP);
                 } catch (Exception e) {
-                    System.err.println("Error updating DNS records: " + e.getMessage());
+                    logger.error("Error updating DNS records: {}", e.getMessage(), e);
                     e.printStackTrace();
                 }
 
-                // Save the new IP
                 ipFileService.appendIP(currentIP);
-            } else {
-                System.out.println("The IP address has not changed, no update needed.");
             }
 
         } catch (Exception e) {
-            System.err.println("Error during execution: " + e.getMessage());
+            logger.error("Error during execution: {}", e.getMessage(), e);
             e.printStackTrace();
         }
     }
