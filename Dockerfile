@@ -9,7 +9,8 @@ WORKDIR /app
 COPY build/libs/dyndns-1.0.0.jar /app/dyndns.jar
 
 # Copy the YAML configuration file
-COPY config/application.yaml /app/config/application.yaml
+COPY config/cloudflare.yaml /app/config/cloudflare.yaml
+COPY config/duckdns.yaml /app/config/duckdns.yaml
 
 # Define the command to run the application
 CMD ["java", "-jar", "dyndns.jar"]

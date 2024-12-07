@@ -47,4 +47,7 @@ bin/
 *.log
 /target/
 /out/
-config/application.yaml
+config/cloudflare.yaml
+config/duckdns.yaml
+config/cloudflare.yaml
+data/*
