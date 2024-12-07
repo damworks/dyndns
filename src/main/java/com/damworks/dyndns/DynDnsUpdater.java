@@ -1,6 +1,7 @@
 package com.damworks.dyndns;
 
-import com.damworks.dyndns.config.DynDnsConfig;
+import com.damworks.dyndns.config.DuckDnsConfig;
+import com.damworks.dyndns.service.DnsUpdaterService;
 import com.damworks.dyndns.service.IpFetcherService;
 import com.damworks.dyndns.service.IpFileService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,12 +13,7 @@ public class DynDnsUpdater {
     public static void main(String[] args) {
         try {
             ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-            DynDnsConfig config = mapper.readValue(new File("config/application.yaml"), DynDnsConfig.class);
-
-            System.out.println("Configuration loaded:");
-            System.out.println("API Token: " + config.getDyndns().getApiToken());
-            System.out.println("Zone ID: " + config.getDyndns().getZoneId());
-            System.out.println("Check interval: " + config.getDyndns().getCheckInterval() + " minutes");
+            DuckDnsConfig config = mapper.readValue(new File("config/duckdns.yaml"), DuckDnsConfig.class);
 
             // Services
             IpFileService ipFileService = new IpFileService();
@@ -34,6 +30,25 @@ public class DynDnsUpdater {
             // Compare IPs
             if (!currentIP.equals(lastIP)) {
                 System.out.println("The IP address has changed, update required.");
+
+                try {
+                    // Update the DNS records using DuckDNS API
+                    DnsUpdaterService dnsUpdaterService = new DnsUpdaterService(
+                            config.getDuckdns().getDomain(),
+                            config.getDuckdns().getToken(),
+                            config.getDuckdns().isIpDetectionEnabled(),
+                            config.getDuckdns().isIpv6DetectionEnabled(),
+                            config.getDuckdns().isVerbose(),
+                            config.getDuckdns().isClearRecords()
+                    );
+
+                    // Pass the current IP to the updater service
+                    dnsUpdaterService.updateDuckDns(currentIP, null); // Set IPv6 if needed
+                    System.out.println("DNS records updated successfully.");
+                } catch (Exception e) {
+                    System.err.println("Error updating DNS records: " + e.getMessage());
+                    e.printStackTrace();
+                }
 
                 // Save the new IP
                 ipFileService.appendIP(currentIP);
