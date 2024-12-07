@@ -7,7 +7,7 @@ group = 'com.damworks.dyndns'
 version = '1.0.0'
 
 application {
-    mainClass = 'com.example.dyndns.DynDnsUpdater'
+    mainClass = 'com.damworks.dyndns.DynDnsUpdater'
 }
 
 java {
@@ -37,5 +37,10 @@ jar {
         attributes(
                 'Main-Class': application.mainClass.get()
         )
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE // Handle duplicate files in dependencies
+    // Include runtime dependencies in the JAR (creates a "fat JAR")
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
 }

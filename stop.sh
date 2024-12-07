@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Container name
-CONTAINER_NAME="dyndns-updater"
+CONTAINER_NAME="dyndns"
 
 # Check if the container is running
 if [ "$(docker ps -q -f name=$CONTAINER_NAME)" ]; then
