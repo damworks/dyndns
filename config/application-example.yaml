@@ -1,0 +1,9 @@
+dyndns:
+  apiToken: "your_api_token"
+  zoneId: "your_zone_id"
+  records:
+    - name: "subdomain1.example.com"
+      recordId: "record_id_1"
+    - name: "subdomain2.example.com"
+      recordId: "record_id_2"
+  checkInterval: 10 # minuti
