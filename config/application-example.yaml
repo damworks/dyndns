@@ -1,3 +1,11 @@
+duckdns:
+  domain: "yourdomain"       # Name of the DuckDNS subdomain, without .duckdns.org
+  token: "yourtoken"         # DuckDNS token
+  ipDetectionEnabled: true   # Use automatic IP detection (optional)
+  ipv6DetectionEnabled: false # Enable IPv6 handling
+  verbose: true              # Enable detailed output in responses
+  clearRecords: false        # Clear records (optional)
+
 dyndns:
   apiToken: "your_api_token"
   zoneId: "your_zone_id"
