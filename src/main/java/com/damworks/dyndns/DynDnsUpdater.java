@@ -1,7 +1,10 @@
 package com.damworks.dyndns;
 
+import com.damworks.dyndns.config.AppConfig;
+import com.damworks.dyndns.config.DatabaseConfig;
 import com.damworks.dyndns.config.DuckDnsConfig;
 import com.damworks.dyndns.service.DnsUpdaterService;
+import com.damworks.dyndns.service.IpDatabaseService;
 import com.damworks.dyndns.service.IpFetcherService;
 import com.damworks.dyndns.service.IpFileService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,6 +27,14 @@ public class DynDnsUpdater {
 
             ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
             DuckDnsConfig config = mapper.readValue(new File("config/duckdns.yaml"), DuckDnsConfig.class);
+            AppConfig appConfig = mapper.readValue(new File("config/database.yaml"), AppConfig.class);
+
+            DatabaseConfig databaseConfig = appConfig.getDatabase();
+            IpDatabaseService ipDatabaseService = new IpDatabaseService(
+                    databaseConfig.getUrl(),
+                    databaseConfig.getUsername(),
+                    databaseConfig.getPassword()
+            );
 
             // Services
             IpFileService ipFileService = new IpFileService();
@@ -31,9 +42,10 @@ public class DynDnsUpdater {
 
             // Get the current public IP
             String currentIP = ipFetcherService.getCurrentPublicIP();
+            String lastIP = ipDatabaseService.getLastSavedIP();
 
-            // Read the last saved IP
-            String lastIP = ipFileService.getLastSavedIP();
+            // Read the last saved IP from file
+            // String lastIP = ipFileService.getLastSavedIP();
 
             if (currentIP == null || currentIP.isEmpty()) {
                 logger.error("Error: Unable to fetch current IP.");
@@ -57,15 +69,14 @@ public class DynDnsUpdater {
 
                     // Pass the current IP to the updater service
                     dnsUpdaterService.updateDuckDns(currentIP, null); // Set IPv6 if needed
+                    ipDatabaseService.saveIP(currentIP);
+                    //ipFileService.appendIP(currentIP);
                     logger.info("New IP -> {} UPDATED", currentIP);
                 } catch (Exception e) {
                     logger.error("Error updating DNS records: {}", e.getMessage(), e);
                     e.printStackTrace();
                 }
-
-                ipFileService.appendIP(currentIP);
             }
-
         } catch (Exception e) {
             logger.error("Error during execution: {}", e.getMessage(), e);
             e.printStackTrace();

@@ -57,10 +57,8 @@ public class DnsUpdaterService {
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
             String response = reader.readLine();
-            if (response != null && response.startsWith("OK")) {
-                logger.info("DuckDNS update successful. Response: {}", response);
-            } else {
-                throw new Exception("DuckDNS update failed. Response: " + response);
+            if (response == null || response.isEmpty() || !response.startsWith("OK")) {
+                throw new Exception("DuckDNS update failed. Response: " + (response != null ? response : "No response received."));
             }
         }
     }
