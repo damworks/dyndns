@@ -38,16 +38,18 @@ public class IpDatabaseService {
         return null;
     }
 
-    public void saveIP(String ip) {
+    public boolean saveIP(String ip) {
         String query = "INSERT INTO ip_logs (ip_address) VALUES (?)";
 
         try (Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
              PreparedStatement statement = connection.prepareStatement(query)) {
 
             statement.setString(1, ip);
-            statement.executeUpdate();
+            int rowsInserted = statement.executeUpdate();
+            return rowsInserted > 0;
         } catch (Exception e) {
             logger.error("Error saving IP to the database: {}", e.getMessage(), e);
         }
+        return false;
     }
 }
