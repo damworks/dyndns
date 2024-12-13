@@ -22,8 +22,7 @@ public class DynDnsUpdater {
 
     public static void main(String[] args) {
         try {
-            String timestamp = LocalDateTime.now().format(formatter);
-            logger.info("{} Starting DynDNS update...", timestamp);
+            logger.info("Starting DynDNS update...");
 
             ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
             DuckDnsConfig config = mapper.readValue(new File("config/duckdns.yaml"), DuckDnsConfig.class);
