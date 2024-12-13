@@ -68,17 +68,18 @@ public class DynDnsUpdater {
 
                     // Pass the current IP to the updater service
                     dnsUpdaterService.updateDuckDns(currentIP, null); // Set IPv6 if needed
-                    ipDatabaseService.saveIP(currentIP);
+
+                    if (ipDatabaseService.saveIP(currentIP)) {
+                        logger.info("New IP -> {} UPDATED", currentIP);
+                    }
                     //ipFileService.appendIP(currentIP);
-                    logger.info("New IP -> {} UPDATED", currentIP);
                 } catch (Exception e) {
                     logger.error("Error updating DNS records: {}", e.getMessage(), e);
-                    e.printStackTrace();
                 }
+
             }
         } catch (Exception e) {
             logger.error("Error during execution: {}", e.getMessage(), e);
-            e.printStackTrace();
         }
     }
 }
